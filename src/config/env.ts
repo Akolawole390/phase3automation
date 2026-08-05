@@ -28,4 +28,13 @@ export const env = {
   get googleSheetsSpreadsheetId() {
     return required("GOOGLE_SHEETS_SPREADSHEET_ID");
   },
+  get triggerSecretKey() {
+    return required("TRIGGER_SECRET_KEY");
+  },
+  get triggerApiUrl() {
+    return required("TRIGGER_API_URL");
+  },
+  get triggerProjectRef() {
+    return required("TRIGGER_PROJECT_REF");
+  },
 };
