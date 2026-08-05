@@ -1,0 +1,12 @@
+{
+  "name": "phase3automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@trigger.dev/sdk": "^4.5.9"
+  },
+  "devDependencies": {
+    "@trigger.dev/build": "^4.5.9"
+  }
+}
