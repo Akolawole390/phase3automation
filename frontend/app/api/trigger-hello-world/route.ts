@@ -14,10 +14,7 @@ export async function POST() {
   } catch (error) {
     console.error("Failed to trigger hello-world task", error);
     return NextResponse.json(
-      {
-        error: "Failed to trigger task",
-        detail: error instanceof Error ? error.message : String(error),
-      },
+      { error: "Failed to trigger task" },
       { status: 500 }
     );
   }
