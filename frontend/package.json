@@ -10,9 +10,11 @@
   "dependencies": {
     "@trigger.dev/react-hooks": "^4.5.9",
     "@trigger.dev/sdk": "^4.5.9",
+    "googleapis": "^174.0.1",
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@types/node": "^20",

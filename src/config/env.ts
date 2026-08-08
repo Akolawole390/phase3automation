@@ -25,6 +25,12 @@ export const env = {
   get googleApplicationCredentials() {
     return required("GOOGLE_APPLICATION_CREDENTIALS");
   },
+  /** Full service-account JSON as a string — fallback for deployed runners
+   * where the credentials file isn't present on disk. Optional: only one
+   * of this or the file needs to exist. */
+  get googleServiceAccountJson() {
+    return process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  },
   get googleSheetsSpreadsheetId() {
     return required("GOOGLE_SHEETS_SPREADSHEET_ID");
   },
