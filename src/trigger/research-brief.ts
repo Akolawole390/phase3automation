@@ -43,6 +43,7 @@ const TBS_BY_RECENCY: Record<Recency, string | undefined> = {
 
 const MAX_SOURCE_CHARS = 6000;
 const MAX_SOURCES_TO_SCRAPE = 6;
+const SCRAPE_STAGGER_MS = 2500;
 
 function slugify(text: string): string {
   return text
@@ -66,6 +67,16 @@ export const researchBriefTask = task({
   // Default machine (small-1x, ~0.5GB) OOMs under the combined weight of the
   // Anthropic/Firecrawl/googleapis SDKs plus several scraped pages in memory.
   machine: "medium-1x",
+  // A full retry re-runs search + every scrape + the Anthropic call, which
+  // is expensive and — on a rate-limit failure specifically — counterproductive
+  // (an instant retry just re-triggers the same limit). Two attempts with a
+  // real gap is enough; the search+scrape step also degrades gracefully on
+  // partial scrape failures without needing a task-level retry at all.
+  retry: {
+    maxAttempts: 2,
+    minTimeoutInMs: 15_000,
+    maxTimeoutInMs: 30_000,
+  },
   run: async (payload: ResearchBriefPayload, { ctx }): Promise<ResearchBriefOutput> => {
     const topic = payload.topic?.trim();
     if (!topic) throw new Error("topic is required");
@@ -91,11 +102,18 @@ export const researchBriefTask = task({
     const candidates = webResults.slice(0, MAX_SOURCES_TO_SCRAPE);
     logger.log(`Scraping ${candidates.length} sources`);
 
-    const scraped = await Promise.allSettled(
-      candidates.map((c) =>
-        firecrawl.scrape(c.url, { formats: ["markdown"], onlyMainContent: true })
-      )
-    );
+    // Sequential with a stagger rather than Promise.all — firing all scrapes
+    // at once trips Firecrawl's per-minute rate limit on lower-tier plans.
+    const scraped: PromiseSettledResult<Awaited<ReturnType<typeof firecrawl.scrape>>>[] = [];
+    for (const c of candidates) {
+      try {
+        const doc = await firecrawl.scrape(c.url, { formats: ["markdown"], onlyMainContent: true });
+        scraped.push({ status: "fulfilled", value: doc });
+      } catch (err) {
+        scraped.push({ status: "rejected", reason: err });
+      }
+      await new Promise((r) => setTimeout(r, SCRAPE_STAGGER_MS));
+    }
 
     const today = new Date().toISOString().slice(0, 10);
     const sources: Source[] = [];
