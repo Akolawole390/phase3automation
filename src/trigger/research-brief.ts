@@ -99,14 +99,16 @@ export const researchBriefTask = task({
 
     const today = new Date().toISOString().slice(0, 10);
     const sources: Source[] = [];
+    const failures: string[] = [];
     scraped.forEach((result, i) => {
       if (result.status !== "fulfilled") {
-        logger.warn(`Scrape failed for ${candidates[i].url}`, {
-          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
-        });
+        const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+        failures.push(`${candidates[i].url} -> ${reason}`);
+        logger.warn(`Scrape failed for ${candidates[i].url}`, { error: reason });
         return;
       }
       if (!result.value.markdown) {
+        failures.push(`${candidates[i].url} -> no markdown returned`);
         logger.warn(`Scrape returned no markdown for ${candidates[i].url}`);
         return;
       }
@@ -123,7 +125,9 @@ export const researchBriefTask = task({
     });
 
     if (sources.length === 0) {
-      throw new Error("All source scrapes failed; nothing to synthesize from");
+      throw new Error(
+        `All source scrapes failed; nothing to synthesize from. Details: ${failures.join(" | ")}`
+      );
     }
     logger.log(`Successfully scraped ${sources.length} sources`);
 
