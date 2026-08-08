@@ -5,13 +5,13 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
-    "@trigger.dev/sdk": "4.5.9",
+    "@trigger.dev/sdk": "^4.5.10",
     "firecrawl": "^4.32.0",
     "googleapis": "^174.0.1",
     "marked": "^18.0.9"
   },
   "devDependencies": {
-    "@trigger.dev/build": "4.5.9",
+    "@trigger.dev/build": "^4.5.10",
     "@types/node": "^26.1.2",
     "typescript": "^5.9.3"
   }
