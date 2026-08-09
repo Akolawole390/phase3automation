@@ -9,7 +9,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const expected = siteAuthToken(process.env.SITE_PASSWORD ?? "");
+  const expected = siteAuthToken(
+    process.env.SITE_USERNAME ?? "",
+    process.env.SITE_PASSWORD ?? ""
+  );
   const cookieValue = request.cookies.get(SITE_AUTH_COOKIE)?.value;
 
   if (cookieValue && cookieValue === expected) {

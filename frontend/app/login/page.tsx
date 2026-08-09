@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,11 +19,11 @@ function LoginForm() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Incorrect password");
+        throw new Error(body.error || "Incorrect username or password");
       }
       const dest = searchParams.get("from") || "/";
       router.push(dest);
@@ -46,21 +47,31 @@ function LoginForm() {
       <h1 style={{ fontSize: "1.3rem", marginBottom: "1rem" }}>Research Agent</h1>
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          autoFocus
+          required
+          autoComplete="username"
+          style={{ padding: "0.6rem", fontSize: "1rem", border: "1px solid #ccc", borderRadius: 4 }}
+        />
+        <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          autoFocus
           required
+          autoComplete="current-password"
           style={{ padding: "0.6rem", fontSize: "1rem", border: "1px solid #ccc", borderRadius: 4 }}
         />
         <button
           type="submit"
-          disabled={isSubmitting || !password}
+          disabled={isSubmitting || !username || !password}
           style={{
             padding: "0.6rem 1rem",
             fontSize: "1rem",
-            cursor: isSubmitting || !password ? "not-allowed" : "pointer",
+            cursor: isSubmitting || !username || !password ? "not-allowed" : "pointer",
             background: "#111",
             color: "#fff",
             border: "none",
